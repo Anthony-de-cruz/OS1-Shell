@@ -6,7 +6,12 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#define INP_MAX 1000
+
 void parse_command(char string[], char command[], char **args) {
+    // Breaks down input "string" and modifies "command" and "args"
+    // with the pieces.
+    //
 
     char temp[sizeof(char) * strlen(string)];
     strcpy(temp, string);
@@ -21,13 +26,14 @@ void parse_command(char string[], char command[], char **args) {
 }
 
 void execute_command(char path[], char *const args[], int *running) {
+    // Spawns a fork which executes the program at "path" with arguments
+    // "args". If the program results in the termination of the shell,
+    // "running" will be set to 0.
 
     if (!strcmp(path, "exit") || !strcmp(path, "quit")) {
         *running = 0;
         return;
     }
-
-    char *const arg[5] = {"ls", "/", NULL};
 
     // Spawn fork
     pid_t pid = fork();
@@ -64,31 +70,59 @@ void execute_command(char path[], char *const args[], int *running) {
     return;
 }
 
-int main(int argc, char *argv[]) {
-
-    char input[1000];
-
-    char cwd[5];
+int get_current_dir(char *cwd) {
 
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        printf("CWD: %s\n", cwd);
+
+        char *directories[INP_MAX];
+
+        char temp[sizeof(char) * strlen(cwd)];
+        strcpy(temp, cwd);
+
+        char *token = strtok(temp, " ");
+        for (int x = 0; token; x++) {
+            directories[x] = token;
+            token = strtok(NULL, " ");
+        }
+
+        int len = (int)sizeof(directories) / sizeof(char);
+        cwd = directories[len - 1];
+        return 1;
     }
+    return 0;
+}
+
+int main(int argc, char *argv[]) {
+
+    char input[INP_MAX];
+
+    char cwd[PATH_MAX];
+    get_current_dir(cwd);
+    printf("%s\n", cwd);
+
+
 
     int running = 1;
 
     while (running) {
 
         // Input
-        printf("\n>");
-        fgets(input, sizeof(input), stdin);
-        size_t len = strlen(input);
-        if (len > 0 && input[len - 1] == '\n') {
-            input[len - 1] = '\0';
+        printf("\n%s>", cwd);
+        if (fgets(input, sizeof(input), stdin) != NULL) {
+            if (!strcmp(input, "\n")) {
+                continue;
+            }
+            size_t len = strlen(input);
+            if (len > 0 && input[len - 1] == '\n') {
+                input[len - 1] = '\0';
+            }
+        } else {
+            printf("Error reading input.\n");
+            continue;
         }
 
-        // char *argss[] = calloc(sizeof(char) * 100);
-        char **args = calloc(100, sizeof(char));
-        char command[100];
+        char **args = calloc(PATH_MAX, sizeof(char));
+        char command[PATH_MAX];
 
         parse_command(input, command, args);
 
