@@ -8,11 +8,14 @@ Build with:
 gcc src/main.c -o OS1-Shell.out
 ```
 - Has built in commands:
-    - cd <dir>
-        Change working directory
+    - cd {dir}
+        - Change working directory
     - exit 
-        End session
+        - End session
+    - quit
+        - End session
 - Runs any command added to PATH
+- Can only run 1 command at a time
 
 Example:
 ```sh
