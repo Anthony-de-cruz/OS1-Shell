@@ -1,123 +1,45 @@
 #include <limits.h>
-#include <pthread.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/wait.h>
-#include <unistd.h>
 
-#define INP_MAX 1000
+#include "command.h"
 
-void parse_command(char string[], char command[], char **args) {
-    // Breaks down input "string" and modifies "command" and "args"
-    // with the pieces.
-    //
+#define ARG_MAX 1000
 
-    char temp[sizeof(char) * strlen(string)];
-    strcpy(temp, string);
+bool get_input(char input[]) {
+    // Gets the command line user input with fgets.
+    // Strips the input of \n and replaces it with \0.
 
-    char *token = strtok(temp, " ");
-    strcpy(command, token);
-
-    for (int x = 0; token; x++) {
-        args[x] = token;
-        token = strtok(NULL, " ");
-    }
-}
-
-void execute_command(char path[], char *const args[], int *running) {
-    // Spawns a fork which executes the program at "path" with arguments
-    // "args". If the program results in the termination of the shell,
-    // "running" will be set to 0.
-
-    if (!strcmp(path, "exit") || !strcmp(path, "quit")) {
-        *running = 0;
-        return;
-    }
-
-    // Spawn fork
-    pid_t pid = fork();
-
-    if (pid < 0) {
-        perror("Fork error");
-        return;
-
-    } else if (pid == 0) {
-
-        // Execute builtins
-        if (!strcmp(path, "cd")) {
-            printf("Changing to %s\n", args[1]);
-            if (chdir(args[1]) < 0) {
-                perror("CD error");
-                return;
-            };
-
-            // Execute from PATH
-        } else if (execvp(path, args) < 0) {
-            perror("Execl error");
-            return;
+    if (fgets(input, ARG_MAX, stdin) != NULL) {
+        if (!strcmp(input, "\n")) {
+            return false;
         }
-
+        size_t len = strlen(input);
+        if (len > 0 && input[len - 1] == '\n') {
+            input[len - 1] = '\0';
+        }
     } else {
-        // Wait for fork to finish
-        int status;
-        if (waitpid(pid, &status, 0) < 0) {
-            perror("Waitpid error");
-            return;
-        }
+        printf("Error reading input.\n");
+        return false;
     }
 
-    return;
-}
-
-int get_current_dir(char *cwd) {
-
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-
-        char *directories[INP_MAX];
-
-        char temp[sizeof(char) * strlen(cwd)];
-        strcpy(temp, cwd);
-
-        char *token = strtok(temp, " ");
-        for (int x = 0; token; x++) {
-            directories[x] = token;
-            token = strtok(NULL, " ");
-        }
-
-        int len = (int)sizeof(directories) / sizeof(char);
-        cwd = directories[len - 1];
-        return 1;
-    }
-    return 0;
+    return true;
 }
 
 int main(int argc, char *argv[]) {
 
-    char input[INP_MAX];
-
+    char input[ARG_MAX];
     char cwd[PATH_MAX];
-    get_current_dir(cwd);
-    printf("%s\n", cwd);
 
-
-
-    int running = 1;
+    bool running = true;
 
     while (running) {
 
         // Input
-        printf("\n%s>", cwd);
-        if (fgets(input, sizeof(input), stdin) != NULL) {
-            if (!strcmp(input, "\n")) {
-                continue;
-            }
-            size_t len = strlen(input);
-            if (len > 0 && input[len - 1] == '\n') {
-                input[len - 1] = '\0';
-            }
-        } else {
-            printf("Error reading input.\n");
+        printf("\n❯ ");
+        if (!get_input(input)) {
             continue;
         }
 
