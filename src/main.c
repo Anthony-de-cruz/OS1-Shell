@@ -8,9 +8,9 @@
 
 #define ARG_MAX 1000
 
+// Gets the command line user input with fgets.
+// Strips the input of \n and replaces it with \0.
 bool get_input(char input[]) {
-    // Gets the command line user input with fgets.
-    // Strips the input of \n and replaces it with \0.
 
     if (fgets(input, ARG_MAX, stdin) != NULL) {
         if (!strcmp(input, "\n")) {
@@ -31,7 +31,9 @@ bool get_input(char input[]) {
 int main(int argc, char *argv[]) {
 
     char input[ARG_MAX];
-    char cwd[PATH_MAX];
+    // char **args = calloc(PATH_MAX, sizeof(char));
+    char *args[ARG_MAX];
+    char command[PATH_MAX];
 
     bool running = true;
 
@@ -43,20 +45,16 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        char **args = calloc(PATH_MAX, sizeof(char));
-        char command[PATH_MAX];
+        
 
         parse_command(input, command, args);
 
         printf("CMD: %s > %s %s %s %s\n", command, args[0], args[1], args[2],
                args[3]);
 
-        char *const argz[] = {"-a", NULL};
-        execute_command(command, args, &running);
+        running = execute_command(command, args);
 
-        if (!running) {
-            free(args);
-        }
+        printf("Running1: %s\n", running ? "true" : "false");
     }
 
     return EXIT_SUCCESS;

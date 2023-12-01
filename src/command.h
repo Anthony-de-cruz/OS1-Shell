@@ -5,6 +5,6 @@
 
 void parse_command(char string[], char command[], char *args[]);
 
-void execute_command(char path[], char *const args[], bool *running);
+bool execute_command(char path[], char *const args[]);
 
 #endif
