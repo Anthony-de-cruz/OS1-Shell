@@ -20,38 +20,40 @@ gcc src/main.c -o OS1-Shell.out
 Example:
 ```sh
 ❯ ./OS1-Shell.out
-
->mkdir hi
-
->cd hi
-
->touch bi
-
->cd ..
-
->tree
+❯ mkdir example
+❯ cd example
+❯ touch file
+❯ ls
+file
+❯ cd ..
+❯ tree
 .
-├── hi
-│   └── bi
+├── example
+│   └── file
 ├── Makefile
 ├── OS1-Shell.out
 ├── README.md
 └── src
-    └── main.c
+    ├── command.c
+    ├── command.h
+    ├── command.o
+    ├── main.c
+    └── main.o
 
-3 directories, 5 files
-
->rm -r hi
-
->tree
+3 directories, 9 files
+❯ rm -r example
+❯ tree
 .
 ├── Makefile
 ├── OS1-Shell.out
 ├── README.md
 └── src
-    └── main.c
+    ├── command.c
+    ├── command.h
+    ├── command.o
+    ├── main.c
+    └── main.o
 
-2 directories, 4 files
-
->exit
+2 directories, 8 files
+❯ quit
 ```
