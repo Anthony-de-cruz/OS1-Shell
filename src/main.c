@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Allocate space for the arguments
+        free(args);
         args = realloc(args, ARG_MAX * sizeof(char *));
         
         parse_command(input, args);
@@ -54,8 +55,6 @@ int main(int argc, char *argv[]) {
         }*/
 
     } while (execute_command(args));
-
-    free(args);
 
     return EXIT_SUCCESS;
 }
