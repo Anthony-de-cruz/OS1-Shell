@@ -16,6 +16,7 @@ bool get_input(char input[]) {
         if (!strcmp(input, "\n")) {
             return false;
         }
+        // Remove \n and replace with \0
         size_t len = strlen(input);
         if (len > 0 && input[len - 1] == '\n') {
             input[len - 1] = '\0';
