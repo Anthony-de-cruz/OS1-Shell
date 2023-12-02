@@ -37,8 +37,6 @@ bool execute_command(char *const args[]) {
             perror("CD error");
             return true;
         };
-
-        printf("CHANGING TO to %s\n", args[1]);
         return true;
     }
 
