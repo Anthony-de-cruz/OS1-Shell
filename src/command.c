@@ -9,12 +9,6 @@
 void parse_command(char string[], char command[], char *args[]) {
     // Breaks down input "string" and modifies "command" and "args"
     // with the pieces.
-    //
-
-    // Reset args to NULL
-    for (int x = 0; x < sizeof(*args) / sizeof(char *); x++) {
-        args[x] = NULL;
-    }
 
     char temp[sizeof(char) * strlen(string)];
     strcpy(temp, string);
@@ -26,15 +20,13 @@ void parse_command(char string[], char command[], char *args[]) {
         args[x] = token;
         token = strtok(NULL, " ");
     }
-
-
-    printf("size of *args %ld\nsize of args \n", sizeof(**args));
 }
 
 bool execute_command(char path[], char *const args[]) {
     // Spawns a fork which executes the program at "path" with arguments
     // "args". If the program results in the termination of the shell,
     // "running" will be set to 0.
+    //
 
     if (!strcmp(path, "exit") || !strcmp(path, "quit")) {
         return false;
@@ -45,7 +37,7 @@ bool execute_command(char path[], char *const args[]) {
 
     if (pid < 0) {
         perror("Fork error");
-        return true;
+        return false;
 
     } else if (pid == 0) {
 
@@ -54,21 +46,23 @@ bool execute_command(char path[], char *const args[]) {
             printf("Changing to %s\n", args[1]);
             if (chdir(args[1]) < 0) {
                 perror("CD error");
-                return true;
+                return false;
             };
 
             // Execute from PATH
         } else if (execvp(path, args) < 0) {
             perror("Execl error");
-            return true;
+            return false;
         }
+
+        return false;
 
     } else {
         // Wait for fork to finish
         int status;
         if (waitpid(pid, &status, 0) < 0) {
             perror("Waitpid error");
-            return true;
+            return false;
         }
     }
 

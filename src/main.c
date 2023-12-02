@@ -31,31 +31,27 @@ bool get_input(char input[]) {
 int main(int argc, char *argv[]) {
 
     char input[ARG_MAX];
-    // char **args = calloc(PATH_MAX, sizeof(char));
     char *args[ARG_MAX];
     char command[PATH_MAX];
 
-    bool running = true;
-
-    while (running) {
-
+    do {
         // Input
-        printf("\n❯ ");
+        printf("❯ ");
         if (!get_input(input)) {
             continue;
         }
+        printf("");
 
-        
-
+        // Reset args to NULL
+        for (int x = 0; x < ARG_MAX; x++) {
+            args[x] = NULL;
+        }
         parse_command(input, command, args);
 
-        printf("CMD: %s > %s %s %s %s\n", command, args[0], args[1], args[2],
-               args[3]);
+        //printf("CMD: %s > %s %s %s %s\n", command, args[0], args[1], args[2],
+        //       args[3]);
 
-        running = execute_command(command, args);
-
-        printf("Running1: %s\n", running ? "true" : "false");
-    }
+    } while (execute_command(command, args));
 
     return EXIT_SUCCESS;
 }
