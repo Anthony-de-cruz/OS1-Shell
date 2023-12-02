@@ -3,8 +3,12 @@
 
 #include <stdbool.h>
 
-void parse_command(char string[], char command[], char *args[]);
+// Parses input down into args
+void parse_command(char input[], char *args[]);
 
-bool execute_command(char path[], char *const args[]);
+// Spawns a fork which executes the program at "path" with arguments
+// "args". If the program results in the termination of the shell,
+// "running" will be set to 0.
+bool execute_command(char *const args[]);
 
 #endif

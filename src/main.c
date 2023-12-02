@@ -6,7 +6,7 @@
 
 #include "command.h"
 
-#define ARG_MAX 1000
+#define ARG_MAX 20
 
 // Gets the command line user input with fgets.
 // Strips the input of \n and replaces it with \0.
@@ -31,8 +31,8 @@ bool get_input(char input[]) {
 int main(int argc, char *argv[]) {
 
     char input[ARG_MAX];
-    char *args[ARG_MAX];
     char command[PATH_MAX];
+    char **args = malloc(ARG_MAX * sizeof(char *));
 
     do {
         // Input
@@ -40,18 +40,21 @@ int main(int argc, char *argv[]) {
         if (!get_input(input)) {
             continue;
         }
-        printf("");
 
-        // Reset args to NULL
-        for (int x = 0; x < ARG_MAX; x++) {
-            args[x] = NULL;
-        }
-        parse_command(input, command, args);
+        // Allocate space for the arguments
+        args = realloc(args, ARG_MAX * sizeof(char *));
+        
+        parse_command(input, args);
+        
+        /*
+        printf("Args:\n");
+        for (int i = 0; args[i] != NULL; ++i) {
+            printf("    %d: %s\n", i + 1, args[i]);
+        }*/
 
-        //printf("CMD: %s > %s %s %s %s\n", command, args[0], args[1], args[2],
-        //       args[3]);
+    } while (execute_command(args));
 
-    } while (execute_command(command, args));
+    free(args);
 
     return EXIT_SUCCESS;
 }

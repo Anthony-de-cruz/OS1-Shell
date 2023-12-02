@@ -6,30 +6,40 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-void parse_command(char string[], char command[], char *args[]) {
-    // Breaks down input "string" and modifies "command" and "args"
-    // with the pieces.
+// Parses input down into args
+void parse_command(char input[], char *args[]) {
 
-    char temp[sizeof(char) * strlen(string)];
-    strcpy(temp, string);
+    int i = 0;
+    char *token = strtok(input, " ");
 
-    char *token = strtok(temp, " ");
-    strcpy(command, token);
-
-    for (int x = 0; token; x++) {
-        args[x] = token;
+    // Tokenize the input string
+    while (token != NULL) {
+        args[i++] = token;
         token = strtok(NULL, " ");
     }
+
+    // Set the last element of the array to NULL
+    args[i] = NULL;
 }
 
-bool execute_command(char path[], char *const args[]) {
-    // Spawns a fork which executes the program at "path" with arguments
-    // "args". If the program results in the termination of the shell,
-    // "running" will be set to 0.
-    //
+// Spawns a fork which executes the program at "path" with arguments
+// "args". If the program results in the termination of the shell,
+// "running" will be set to 0.
+bool execute_command(char *const args[]) {
 
-    if (!strcmp(path, "exit") || !strcmp(path, "quit")) {
+    if (!strcmp(args[0], "exit") || !strcmp(args[0], "quit")) {
         return false;
+    }
+
+    // Execute builtins
+    if (!strcmp(args[0], "cd")) {
+        if (chdir(args[1]) < 0) {
+            perror("CD error");
+            return true;
+        };
+
+        printf("CHANGING TO to %s\n", args[1]);
+        return true;
     }
 
     // Spawn fork
@@ -39,22 +49,14 @@ bool execute_command(char path[], char *const args[]) {
         perror("Fork error");
         return false;
 
+        // If child fork
     } else if (pid == 0) {
 
-        // Execute builtins
-        if (!strcmp(path, "cd")) {
-            printf("Changing to %s\n", args[1]);
-            if (chdir(args[1]) < 0) {
-                perror("CD error");
-                return false;
-            };
-
-            // Execute from PATH
-        } else if (execvp(path, args) < 0) {
+        // Execute from PATH
+        if (execvp(args[0], args) < 0) {
             perror("Execl error");
             return false;
         }
-
         return false;
 
     } else {
@@ -65,6 +67,6 @@ bool execute_command(char path[], char *const args[]) {
             return false;
         }
     }
-
+    //  Parent process exit point
     return true;
 }
