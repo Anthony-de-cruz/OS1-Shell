@@ -27,12 +27,11 @@ void parse_command(char input[], char *args[]) {
 // "running" will be set to 0.
 bool execute_command(char *const args[]) {
 
+    // Execute builtins
     if (!strcmp(args[0], "exit") || !strcmp(args[0], "quit")) {
         return false;
-    }
 
-    // Execute builtins
-    if (!strcmp(args[0], "cd")) {
+    } else if (!strcmp(args[0], "cd")) {
         if (chdir(args[1]) < 0) {
             perror("CD error");
             return true;
@@ -65,6 +64,6 @@ bool execute_command(char *const args[]) {
             return false;
         }
     }
-    //  Parent process exit point
+    // Parent process exit point
     return true;
 }
